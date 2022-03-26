@@ -36,3 +36,72 @@ DATA_LOADING_QUERY = (
         INSERT INTO sales_data (%s) VALUES %s
     """
 )
+CUSTOMER_PURCHASED_HIGHEST_QUANTITY_QUERY = (
+    """
+        SELECT 
+            casted_date, 
+            customer_id, 
+            total_quantity 
+        FROM (
+            SELECT 
+                casted_date, 
+                customer_id, 
+                total_quantity, 
+                RANK() OVER (PARTITION BY casted_date ORDER BY total_quantity DESC) quantity_rank 
+            FROM (
+                SELECT 
+                    DATE(date) casted_date, 
+                    customer_id, 
+                    SUM(quantity) total_quantity 
+                FROM 
+                    sales_data 
+                WHERE 
+                    customer_id IS NOT NULL 
+                GROUP BY 
+                    casted_date, 
+                    customer_id
+            )  a
+        ) b 
+        WHERE 
+            quantity_rank = 1 
+        ORDER BY 
+            casted_date DESC
+    """
+)
+CUSTOMER_PURCHASED_HIGHEST_QUANTITY_QUERY_ANOTHER_QUERY = (
+    """
+        WITH temp AS (
+            SELECT 
+                DATE(date) casted_date, 
+                customer_id, 
+                SUM(quantity) total_quantity 
+            FROM 
+                sales_data 
+            WHERE 
+                customer_id IS NOT NULL 
+            GROUP BY 
+                casted_date, customer_id
+        )
+        SELECT 
+            casted_date, 
+            customer_id, 
+            total_quantity 
+        FROM 
+            temp 
+        INNER JOIN (
+            SELECT 
+                casted_date cd, 
+                MAX(total_quantity) max_q 
+            FROM 
+                temp 
+            GROUP BY 
+                casted_date
+        ) AS a 
+        ON 
+            temp.casted_date=a.cd 
+        AND 
+            temp.total_quantity = a.max_q 
+        ORDER BY 
+            casted_date DESC
+    """
+)
