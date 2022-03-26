@@ -1,0 +1,5 @@
+.env
+*.csv
+env/
+__pycache__/
+.idea/
