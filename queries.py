@@ -39,9 +39,9 @@ DATA_LOADING_QUERY = (
 CUSTOMER_PURCHASED_HIGHEST_QUANTITY_QUERY = (
     """
         SELECT 
-            casted_date, 
+            casted_date date, 
             customer_id, 
-            total_quantity 
+            total_quantity quantity 
         FROM (
             SELECT 
                 casted_date, 
@@ -112,6 +112,8 @@ TOP_10_CUSTOMERS_WITH_SALES_AMOUNT = (
             ROUND(SUM(quantity * unit_price), 2) sales_amount 
         FROM 
             sales_data 
+        WHERE
+            customer_id IS NOT NULL
         GROUP BY 
             customer_id 
         ORDER BY 
@@ -125,13 +127,15 @@ TOP_10_PRODUCTS_PURCHASES = (
         SELECT 
             stock_code, 
             JSON_EXTRACT(JSON_ARRAYAGG(description), '$[0]') stock_name, 
-            SUM(quantity) total_saled 
+            SUM(quantity) total_sale 
         FROM 
             sales_data 
+        WHERE
+            stock_code IS NOT NULL
         GROUP BY 
             stock_code 
         ORDER BY 
-            total_saled DESC 
+            total_sale DESC 
         LIMIT 10
     """
 )

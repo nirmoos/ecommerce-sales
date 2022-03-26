@@ -9,6 +9,7 @@ import sys
 
 from dotenv import load_dotenv
 from mysql.connector import errorcode
+from tabulate import tabulate
 
 from queries import *
 from utils import parse_datetime
@@ -85,6 +86,24 @@ class EcommerceSale:
             self.cursor.execute(formatted_insert_query)
             self.cnx.commit()
 
+    def fetch_most_purchased_customers(self):
+        self.cursor.execute(CUSTOMER_PURCHASED_HIGHEST_QUANTITY_QUERY)
+        result = list(self.cursor)
+
+        return result
+
+    def fetch_top10_customers_who_spent_most(self):
+        self.cursor.execute(TOP_10_CUSTOMERS_WITH_SALES_AMOUNT)
+        result = list(self.cursor)
+
+        return result
+
+    def fetch_most_purchased_products(self):
+        self.cursor.execute(TOP_10_PRODUCTS_PURCHASES)
+        result = list(self.cursor)
+
+        return result
+
     @staticmethod
     def _fetch_csv_data_as_batches_of_10000():
         file = open("./data/data.csv", encoding="ISO-8859-1")
@@ -114,6 +133,18 @@ class EcommerceSale:
 def main(force_load):
     ecommerce_sale = EcommerceSale()
     ecommerce_sale.load_data(force_load)
+
+    print("\n\033[95mMost purchased customers over the days:\033[96m\n")
+    result = ecommerce_sale.fetch_most_purchased_customers()
+    print(tabulate(result, headers=["Date", "Customer ID", "Quantity"]))
+
+    print("\n\033[95mTop 10 customers who spent the most:\033[96m\n")
+    result = ecommerce_sale.fetch_top10_customers_who_spent_most()
+    print(tabulate(result, headers=["Customer ID", "Sales Amount"]))
+
+    print("\n\033[95mTop 10 products purchased more:\033[96m\n")
+    result = ecommerce_sale.fetch_most_purchased_products()
+    print(tabulate(result, headers=["Stock Code", "Stock Name", "Total Sale"]))
 
 
 if __name__ == "__main__":
