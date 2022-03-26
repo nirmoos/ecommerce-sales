@@ -105,3 +105,33 @@ CUSTOMER_PURCHASED_HIGHEST_QUANTITY_QUERY_ANOTHER_QUERY = (
             casted_date DESC
     """
 )
+TOP_10_CUSTOMERS_WITH_SALES_AMOUNT = (
+    """
+        SELECT 
+            customer_id, 
+            ROUND(SUM(quantity * unit_price), 2) sales_amount 
+        FROM 
+            sales_data 
+        GROUP BY 
+            customer_id 
+        ORDER BY 
+            sales_amount DESC 
+        LIMIT 
+            10
+    """
+)
+TOP_10_PRODUCTS_PURCHASES = (
+    """
+        SELECT 
+            stock_code, 
+            JSON_EXTRACT(JSON_ARRAYAGG(description), '$[0]') stock_name, 
+            SUM(quantity) total_saled 
+        FROM 
+            sales_data 
+        GROUP BY 
+            stock_code 
+        ORDER BY 
+            total_saled DESC 
+        LIMIT 10
+    """
+)
